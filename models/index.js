@@ -1,24 +1,51 @@
+const chalk = require("chalk");
 const { Sequelize, DataTypes, Op } = require("sequelize");
-const defineUser = require("./user.model");
-const defineTodo = require("./todo.model");
-const defineTodoGroup = require("./todo-group.model");
-const defineUserTodoGroup = require("./user-todo-group.model");
-const defineRole = require("./role.model");
 require("dotenv").config();
 
 /**
- * Defines Sequelize Models
- * @param {Sequelize} sequelize
+ * get a list of special methods added to a Model for associations
+ * @param {*} model
  */
-async function defineModels(sequelize) {
-    const Todo = defineTodo(sequelize);
-    const TodoGroup = defineTodoGroup(sequelize);
-    const User_TodoGroup = defineUserTodoGroup(sequelize);
-    const User = defineUser(sequelize);
-    const Role = defineRole(sequelize);
+function getSpecialFuncs(model) {
+    console.log("model.associations :>> ", model.associations);
+    for (let assoc of Object.keys(model.associations)) {
+        for (let accessor of Object.keys(model.associations[assoc].accessors)) {
+            console.log(
+                chalk.redBright(
+                    model.name +
+                        "." +
+                        model.associations[assoc].accessors[accessor] +
+                        "()"
+                )
+            );
+        }
+    }
+}
 
-    TodoGroup.hasMany(Todo)
-    Todo.belongsTo(TodoGroup)
+/**
+ * Gets all Models from files, and Setup Relations between them, then return them in object
+ * @param {*} sequelize
+ * @returns all models in object
+ */
+function setupModels(sequelize) {
+    const Todo = require("./Todo.model")(sequelize),
+        TodoGroup = require("./TodoGroup.model")(sequelize),
+        User_TodoGroup = require("./UserTodoGroup.model")(sequelize),
+        User = require("./User.model")(sequelize),
+        Role = require("./Role.model")(sequelize),
+        UserCreds = require("./UserCreds.model")(sequelize);
+    const models = {
+        Todo,
+        TodoGroup,
+        User_TodoGroup,
+        User,
+        Role,
+        UserCreds,
+    };
+
+    // Relations
+    TodoGroup.hasMany(Todo);
+    Todo.belongsTo(TodoGroup);
 
     TodoGroup.belongsToMany(User, {
         through: User_TodoGroup,
@@ -33,11 +60,30 @@ async function defineModels(sequelize) {
     Role.hasMany(User_TodoGroup);
     User_TodoGroup.belongsTo(Role);
 
-    await sequelize.sync({ force: true });
+    User.hasOne(UserCreds);
+    UserCreds.belongsTo(User);
+
+    // getSpecialFuncs(User);
+
+    return models;
+}
+
+/**
+ * calls `sync()` after setting models and relations
+ * @param {*} sequelize
+ */
+async function syncModels(sequelize) {
+    setupModels(sequelize);
+    await sequelize.sync();
 }
 
 // To run here
 const sequelize = new Sequelize(process.env.DB_URI);
-sequelize.authenticate().then(() => defineModels(sequelize));
+sequelize.authenticate().then(async () => {
+    await syncModels(sequelize);
+});
 
-module.exports = defineModels;
+module.exports = {
+    setupModels,
+    syncModels,
+};

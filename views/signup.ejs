@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signup</title>
+</head>
+<body>
+    <form action="/auth/signup" method="post">
+        <div>
+            <label for="name">name: </label>
+            <input type="text" name="name" id="name"
+                <% if (flash.formData && flash.formData[0].name) { %>
+                value="<%= flash.formData[0].name %>"
+                <% } %>
+            >
+        </div>
+        <div>
+            <label for="email">email: </label>
+            <input type="text" name="email" id="email"
+                <% if (flash.formData && flash.formData[0].email) { %>
+                value="<%= flash.formData[0].email %>"
+                <% } %>
+            >
+        </div>
+        <div>
+            <label for="username">username: </label>
+            <input type="text" name="username" id="username"
+                <% if (flash.formData && flash.formData[0].username) { %>
+                value="<%= flash.formData[0].username %>"
+                <% } %>
+            >
+        </div>
+        <div>
+            <label for="password">password: </label>
+            <input type="password" name="password" id="password"
+                <% if (flash.formData && flash.formData[0].password) { %>
+                value="<%= flash.formData[0].password %>"
+                <% } %>
+            >
+        </div>
+        <div>
+            <input type="submit" value="Done">
+        </div>
+    </form>
+    <%- include('./partials/flash-errors') %>
+</body>
+</html>

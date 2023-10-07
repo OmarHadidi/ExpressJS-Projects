@@ -1,0 +1,7 @@
+<% if (flash.error && flash.error.length) { %>
+    <div class="errors">
+        <% for( const error of flash.error ) { %>
+            <li><%= error %></li>
+        <% } %>
+    </div>
+<% } %>
