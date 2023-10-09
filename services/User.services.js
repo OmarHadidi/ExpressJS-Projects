@@ -1,22 +1,24 @@
-const {User, UserCreds} = require('../config').models;
+const { User, UserCreds } = require("../config").models;
+const bcrypt = require("bcrypt");
 
 class UserServices {
     /**
-     * Creates `User` and his `UserCreds` in DB
-     * @param {*} sequelize 
-     * @param {*} param1 
-     * @returns 
+     * Creates `User` and his `UserCreds` in DB, with hashing password
+     * @param {*} sequelize
+     * @param {*} param1
+     * @returns
      */
-    static async registerUser(sequelize, {name, email, username, hashedPwd}){
-        let userCreds;
+    static async registerUser(sequelize, { name, email, username, password }) {
+        const hashedPwd = await bcrypt.hash(password, await bcrypt.genSalt(4));
+        let user;
         await sequelize.transaction(async (t) => {
-            const user = await User.create({ name, email }, { transaction: t });
-            userCreds = await user.createUserCred(
+            user = await User.create({ name, email }, { transaction: t });
+            await user.createUserCred(
                 { username, password: hashedPwd },
                 { transaction: t }
             );
         });
-        return userCreds;
+        return user;
     }
 }
 

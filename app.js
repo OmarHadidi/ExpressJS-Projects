@@ -30,6 +30,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 app.use(cors());
 app.use(flash());
+// app.set('trust proxy', 1);
 app.use(
     session({
         secret: process.env.SESSION_SECRET,
@@ -38,10 +39,10 @@ app.use(
         cookie: {
             sameSite: "lax",
             httpOnly: true,
-            secure: true,
+            // secure: true,
         },
         store: config.sequelizeSessionStore,
-        proxy: true,
+        // proxy: true,
     })
 );
 app.use(passport.initialize());

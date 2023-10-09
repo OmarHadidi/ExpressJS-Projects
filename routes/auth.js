@@ -3,10 +3,11 @@ const passport = require("passport");
 const bcrypt = require("bcrypt");
 const { Sequelize, Transaction } = require("sequelize");
 const sqlz = require("sequelize");
-const { errors, log, sequelize } = require("../config");
+const { errors, log, sequelize, models, constants } = require("../config");
 const joiSchemas = require("../validation/joi");
 const Joi = require("joi");
 const UserServices = require("../services/User.services");
+const TodoGroupServices = require("../services/TodoGroup.services");
 const { UserCreds, User } = require("../config").models;
 
 const router = Router();
@@ -33,14 +34,16 @@ router.post("/signup", async (req, res, next) => {
         // validate form
         await joiSchemas.signupSchema.validateAsync(req.body);
         // store user and user creds in DB
-        const hashedPwd = await bcrypt.hash(password, await bcrypt.genSalt(4));
-        const userCreds = await UserServices.registerUser(sequelize, {
+        const user = await UserServices.registerUser(sequelize, {
             name,
             email,
             username,
-            hashedPwd,
+            password,
         });
-        req.logIn(userCreds, (err) => {
+        // create Main todo group
+        const mainTdGrp = await TodoGroupServices.createMainTodoGroup(user);
+        // log user in
+        req.logIn(user, (err) => {
             if (err) return next(err);
             res.redirect("/");
         });
@@ -60,8 +63,6 @@ router.post("/signup", async (req, res, next) => {
         }
         next(err);
     }
-
-    // TODO: Use CSRF Token
 });
 
 router.post("/logout", (req, res, next) => {
