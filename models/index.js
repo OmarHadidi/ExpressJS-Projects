@@ -47,6 +47,9 @@ function setupModels(sequelize) {
     TodoGroup.hasMany(Todo);
     Todo.belongsTo(TodoGroup);
 
+    User.hasMany(TodoGroup, { foreignKey: "ownerId" });
+    TodoGroup.belongsTo(User, { as: "owner", foreignKey: "ownerId" });
+
     TodoGroup.belongsToMany(User, {
         through: User_TodoGroup,
     });
@@ -63,6 +66,7 @@ function setupModels(sequelize) {
     User.hasOne(UserCreds);
     UserCreds.belongsTo(User);
 
+    // getSpecialFuncs(TodoGroup);
     // getSpecialFuncs(User);
 
     return models;
@@ -73,14 +77,26 @@ function setupModels(sequelize) {
  * @param {*} sequelize
  */
 async function syncModels(sequelize) {
-    setupModels(sequelize);
+    const models = setupModels(sequelize);
     await sequelize.sync();
+    return models;
 }
 
 // To run here
 const sequelize = new Sequelize(process.env.DB_URI);
 sequelize.authenticate().then(async () => {
-    await syncModels(sequelize);
+    const models = await syncModels(sequelize);
+    // const user = await models.User.create({
+    //     name: "OmarX",
+    //     email: "omar2@omar2.com",
+    // });
+    // const todoGrp = await user.createTodoGroup({
+    //     title: "Second Group",
+    // });
+    // const user2 = await todoGrp.createUser({
+    //     name: "Ahmad",
+    //     email: "ahmad@ahmad.com"
+    // })
 });
 
 module.exports = {

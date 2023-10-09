@@ -4,6 +4,8 @@ const { sequelize, models } = require("./models-setup");
 const passportConf = require("./passport-setup");
 const log = require("./log");
 const errors = require("./errors");
+const constants = require('./constants');
+
 const session = require("express-session");
 
 const SequelizeSessionStore = require("connect-session-sequelize")(
@@ -21,4 +23,5 @@ module.exports = {
     log,
     errors,
     sequelizeSessionStore,
+    constants
 };

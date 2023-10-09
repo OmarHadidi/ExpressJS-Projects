@@ -8,12 +8,12 @@ const verifyUser = async (username, password, done) => {
     const incorrectFlash = {
         message: errors.UsernamePasswordIncorrect(),
     };
-    const user = await UserCreds.findOne({
+    const userCreds = await UserCreds.findOne({
         where: { username },
     });
-    if (!user) return done(null, false, incorrectFlash);
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (isMatch) return done(null, user);
+    if (!userCreds) return done(null, false, incorrectFlash);
+    const isMatch = await bcrypt.compare(password, userCreds.password);
+    if (isMatch) return done(null, {id: userCreds.UserId});
     done(null, false, incorrectFlash);
 };
 
@@ -22,8 +22,8 @@ const localStrategy = new LocalStrategy({}, verifyUser);
 const setupPassport = () => {
     passport.use(localStrategy);
     passport.serializeUser((user, done) => {
-        const { UserId } = user;
-        done(null, UserId);
+        const { id } = user;
+        done(null, id);
     });
     passport.deserializeUser(async (id, done) => {
         const user = await User.findByPk(id);
