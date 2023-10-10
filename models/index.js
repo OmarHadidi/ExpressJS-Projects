@@ -1,4 +1,5 @@
 const chalk = require("chalk");
+const log = require("../config/log");
 const { Sequelize, DataTypes, Op } = require("sequelize");
 require("dotenv").config();
 
@@ -47,6 +48,14 @@ function setupModels(sequelize) {
     TodoGroup.hasMany(Todo);
     Todo.belongsTo(TodoGroup);
 
+    // User.hasOne(TodoGroup, {
+    //     as: "MainTodoGroup",
+    //     foreignKey: "MainUserId",
+    // });
+    // TodoGroup.belongsTo(User, {
+    //     foreignKey: "MainUserId",
+    // });
+
     User.hasMany(TodoGroup, { foreignKey: "ownerId" });
     TodoGroup.belongsTo(User, { as: "owner", foreignKey: "ownerId" });
 
@@ -66,8 +75,8 @@ function setupModels(sequelize) {
     User.hasOne(UserCreds);
     UserCreds.belongsTo(User);
 
-    // getSpecialFuncs(TodoGroup);
-    // getSpecialFuncs(User);
+    getSpecialFuncs(TodoGroup);
+    getSpecialFuncs(User);
 
     return models;
 }
@@ -78,7 +87,7 @@ function setupModels(sequelize) {
  */
 async function syncModels(sequelize) {
     const models = setupModels(sequelize);
-    await sequelize.sync();
+    await sequelize.sync({ force: true, logging: log.sequelize });
     return models;
 }
 
@@ -90,13 +99,14 @@ sequelize.authenticate().then(async () => {
     //     name: "OmarX",
     //     email: "omar2@omar2.com",
     // });
-    // const todoGrp = await user.createTodoGroup({
+    // const MTodoGrp = await user.createMainTodoGroup({
     //     title: "Second Group",
     // });
     // const user2 = await todoGrp.createUser({
     //     name: "Ahmad",
-    //     email: "ahmad@ahmad.com"
-    // })
+    //     email: "ahmad@ahmad.com",
+    // });
+    // console.log(MTodoGrp);
 });
 
 module.exports = {
