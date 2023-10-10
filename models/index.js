@@ -87,7 +87,7 @@ function setupModels(sequelize) {
  */
 async function syncModels(sequelize) {
     const models = setupModels(sequelize);
-    await sequelize.sync({ force: true, logging: log.sequelize });
+    await sequelize.sync({ logging: log.sequelize });
     return models;
 }
 
@@ -107,6 +107,17 @@ sequelize.authenticate().then(async () => {
     //     email: "ahmad@ahmad.com",
     // });
     // console.log(MTodoGrp);
+
+    // const tdGroup = await models.TodoGroup.findByPk(1, {include:models.Todo});
+    // await tdGroup.createTodo({
+    //     task: 'do the laundry'
+    // });
+    // await tdGroup.createTodo({
+    //     task: 'do HW'
+    // });
+    // await tdGroup.createTodo({
+    //     task: 'do exercises'
+    // });
 });
 
 module.exports = {

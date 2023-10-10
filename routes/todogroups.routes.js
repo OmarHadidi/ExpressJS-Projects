@@ -1,15 +1,23 @@
 const { Router } = require("express");
 const mw = require("../middlewares");
 
-const tdGroup1Controller = require("../controllers/todogroup-1.controller");
+const todosController = require("../controllers/todos.controller");
 const tdGroupsAllController = require("../controllers/todogroups-all.controller");
+const { models, log } = require("../config");
 
 // Each group level
 
 const groupRouter = Router();
 
-groupRouter.get("/", (req, res) => {
-    res.send(`Here, Todo Group #${req.groupId}`);
+groupRouter.get("/", async (req, res, next) => {
+    // NOTE: Must set `req.groupId` first
+    const tdGroup = await models.TodoGroup.findByPk(req.groupId, {
+        include: models.Todo,
+        attributes: {
+            exclude: ["id", "ownerId"],
+        },
+    });
+    res.json(tdGroup);
 });
 groupRouter.post("/todos", (req, res) => res.send("Here, Routes"));
 groupRouter.put("/todos/:todoId", (req, res) => res.send("Here, Routes"));
