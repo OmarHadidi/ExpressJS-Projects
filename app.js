@@ -54,8 +54,6 @@ app.use("/auth", routes.auth);
 app.use("/groups", routes.todoGroups.groups);
 app.use("/my", routes.todoGroups.oneGroup);
 
-// /groups/123/todos/234
-
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
     next(createError(404));

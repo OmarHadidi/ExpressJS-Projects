@@ -1,5 +1,8 @@
 const { Router } = require("express");
 
+const tdGroup1Controller = require('../controllers/todogroup-1.controller');
+const tdGroupsAllController = require('../controllers/todogroups-all.controller');
+
 // Each group level
 
 const groupRouter = Router();

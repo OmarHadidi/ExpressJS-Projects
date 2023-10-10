@@ -8,6 +8,6 @@ router.get("/", function (req, res, next) {
 
 module.exports = {
     index: router,
-    auth: require("./auth"),
-    todoGroups: require("./todogroups"),
+    auth: require("./auth.routes"),
+    todoGroups: require("./todogroups.routes"),
 };
