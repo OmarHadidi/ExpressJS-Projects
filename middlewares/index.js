@@ -1,3 +1,4 @@
 module.exports = {
-    setFlash: require('./flash-messages'),
+    setFlash: require("./flash-messages"),
+    tdGrps: require("./todo-groups"),
 };

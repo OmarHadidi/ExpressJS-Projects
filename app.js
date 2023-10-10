@@ -11,7 +11,7 @@ require("dotenv").config();
 
 const config = require("./config");
 const mw = require("./middlewares");
-const routes = require('./routes');
+const routes = require("./routes");
 var app = express();
 
 // view engine setup
@@ -52,7 +52,7 @@ app.use(mw.setFlash());
 app.use("/", routes.index);
 app.use("/auth", routes.auth);
 app.use("/groups", routes.todoGroups.groups);
-app.use("/my", routes.todoGroups.oneGroup);
+app.use("/my", mw.tdGrps.setMyGroupId(), routes.todoGroups.oneGroup);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
