@@ -46,6 +46,7 @@ config.passport.setupPassport();
 
 config.log.system("I am Here");
 // My middlewares
+app.use(mw.setLocalsData());
 app.use(mw.setFlash());
 
 // Routes

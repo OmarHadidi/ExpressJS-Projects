@@ -11,9 +11,9 @@ const todosRouter = require("./todos.routes");
 const groupRouter = Router();
 
 groupRouter.get("/", async (req, res, next) => {
-    // NOTE: Must set `req.groupId` first [Done in setGroupId mw's]
-    log.dump("req.groupId", req.groupId);
-    const tdGroup = await models.TodoGroup.findByPk(req.groupId, {
+    // NOTE: Must set `res.locals.data.groupId` first [Done in setGroupId mw's]
+    log.dump("res.locals.data.groupId", res.locals.data.groupId);
+    const tdGroup = await models.TodoGroup.findByPk(res.locals.data.groupId, {
         include: [
             {
                 model: models.Todo,
