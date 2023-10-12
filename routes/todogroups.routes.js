@@ -4,25 +4,29 @@ const mw = require("../middlewares");
 const todosController = require("../controllers/todos.controller");
 const tdGroupsAllController = require("../controllers/todogroups-all.controller");
 const { models, log } = require("../config");
+const todosRouter = require("./todos.routes");
 
 // Each group level
 
 const groupRouter = Router();
 
 groupRouter.get("/", async (req, res, next) => {
-    // NOTE: Must set `req.groupId` first
+    // NOTE: Must set `req.groupId` first [Done in setGroupId mw's]
+    log.dump("req.groupId", req.groupId);
     const tdGroup = await models.TodoGroup.findByPk(req.groupId, {
-        include: models.Todo,
+        include: [
+            {
+                model: models.Todo,
+                attributes: { exclude: ["id", "TodoGroupId", "deletedAt"] },
+            },
+        ],
         attributes: {
-            exclude: ["id", "ownerId"],
+            exclude: ["id", "OwnerId"],
         },
     });
     res.json(tdGroup);
 });
-groupRouter.post("/todos", (req, res) => res.send("Here, Routes"));
-groupRouter.put("/todos/:todoId", (req, res) => res.send("Here, Routes"));
-groupRouter.delete("/todos/:todoId", (req, res) => res.send("Here, Routes"));
-groupRouter.delete("/todos", (req, res) => res.send("Here, Routes"));
+groupRouter.use("/todos", todosRouter);
 
 // All groups level
 

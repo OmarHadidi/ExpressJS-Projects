@@ -1,3 +1,5 @@
+const { log } = require("../config");
+
 module.exports = {
     /**
      * Returns middleware that
@@ -8,12 +10,16 @@ module.exports = {
         next();
     },
     /**
-     * Returns middleware that
+     * @param {Number | undefined} customId if set, it is
+     * provided as user's main group id instead of the actual
+     * one in the DB. Useful for skipping Auth processes while testing
+     * @returns Returns middleware that
      * Sets `req.groupId` to `req.user`'s "Main" todo group id
      */
-    setMyGroupId: () => (req, res, next) => {
-        // TODO: Here I need MainTodoGroupId
-        req.groupId = 1;
+    setMyGroupId: (customId) => (req, res, next) => {
+        log.dump('req.user', req.user)
+        req.groupId =
+            customId || req.user ? req.user.MainTodoGroupId : undefined;
         next();
     },
 };

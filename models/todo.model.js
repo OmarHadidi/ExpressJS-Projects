@@ -14,6 +14,12 @@ module.exports = function (sequelize) {
                     notEmpty: true,
                 },
             },
+            status:{
+                // false = not done | true = done
+                type: DataTypes.BOOLEAN,
+                allowNull: false,
+                defaultValue: false,
+            }
         },
         { paranoid: true }
     );

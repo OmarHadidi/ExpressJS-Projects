@@ -48,16 +48,16 @@ function setupModels(sequelize) {
     TodoGroup.hasMany(Todo);
     Todo.belongsTo(TodoGroup);
 
-    // User.hasOne(TodoGroup, {
-    //     as: "MainTodoGroup",
-    //     foreignKey: "MainUserId",
-    // });
-    // TodoGroup.belongsTo(User, {
-    //     foreignKey: "MainUserId",
-    // });
+    TodoGroup.hasOne(User, {
+        foreignKey: "MainTodoGroupId",
+    });
+    User.belongsTo(TodoGroup, {
+        as: "MainTodoGroup",
+        foreignKey: "MainTodoGroupId",
+    });
 
-    User.hasMany(TodoGroup, { foreignKey: "ownerId" });
-    TodoGroup.belongsTo(User, { as: "owner", foreignKey: "ownerId" });
+    User.hasMany(TodoGroup, { foreignKey: "OwnerId" });
+    TodoGroup.belongsTo(User, { as: "Owner", foreignKey: "OwnerId" });
 
     TodoGroup.belongsToMany(User, {
         through: User_TodoGroup,
@@ -66,7 +66,7 @@ function setupModels(sequelize) {
         through: User_TodoGroup,
     });
 
-    User.hasMany(Role, { as: "definedRole" });
+    User.hasMany(Role, { as: "DefinedRole" });
     Role.belongsTo(User);
 
     Role.hasMany(User_TodoGroup);
@@ -75,6 +75,7 @@ function setupModels(sequelize) {
     User.hasOne(UserCreds);
     UserCreds.belongsTo(User);
 
+    getSpecialFuncs(Todo);
     getSpecialFuncs(TodoGroup);
     getSpecialFuncs(User);
 
@@ -95,29 +96,15 @@ async function syncModels(sequelize) {
 const sequelize = new Sequelize(process.env.DB_URI);
 sequelize.authenticate().then(async () => {
     const models = await syncModels(sequelize);
-    // const user = await models.User.create({
-    //     name: "OmarX",
-    //     email: "omar2@omar2.com",
-    // });
-    // const MTodoGrp = await user.createMainTodoGroup({
-    //     title: "Second Group",
-    // });
-    // const user2 = await todoGrp.createUser({
-    //     name: "Ahmad",
-    //     email: "ahmad@ahmad.com",
-    // });
-    // console.log(MTodoGrp);
+    // await models.User.sync({ alter:true });
 
-    // const tdGroup = await models.TodoGroup.findByPk(1, {include:models.Todo});
-    // await tdGroup.createTodo({
-    //     task: 'do the laundry'
+    // const user = await models.User.findByPk(1, {
+    //     include: [{ model: models.TodoGroup, as: "MainTodoGroup", include: models.Todo }],
     // });
-    // await tdGroup.createTodo({
-    //     task: 'do HW'
-    // });
-    // await tdGroup.createTodo({
-    //     task: 'do exercises'
-    // });
+    // log.dump("user", user.toJSON());
+    // await user.MainTodoGroup.createTodo({
+    //     task: 'Do Homework'
+    // })
 });
 
 module.exports = {
