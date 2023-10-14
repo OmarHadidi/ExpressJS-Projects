@@ -21,6 +21,7 @@ module.exports = {
             if (userId) {
                 const user = await models.User.findByPk(userId);
                 return req.logIn(user, (err) => next());
+                // TODO: Still requires Login even after Logging in
             }
             res.redirect("/auth/login");
         },

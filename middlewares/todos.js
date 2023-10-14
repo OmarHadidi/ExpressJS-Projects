@@ -1,5 +1,5 @@
 const createHttpError = require("http-errors");
-const { models, errors } = require("../config");
+const { models, errors, log } = require("../config");
 
 module.exports = {
     /**
@@ -37,7 +37,6 @@ module.exports = {
         res.locals.data.todoGroup = todoGroup;
         if (todoGroup.OwnerId != req.user.id)
             return next(createHttpError[401](errors.NotOwner("group")));
-
         next();
     },
 };

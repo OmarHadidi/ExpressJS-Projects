@@ -10,4 +10,5 @@ module.exports = {
     tdGrps: require("./todo-groups"),
     auth: require("./auth"),
     todos: require("./todos"),
+    general: require('./general')
 };
