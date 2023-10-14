@@ -4,6 +4,8 @@ const { models, errors } = require("../config");
 module.exports = {
     /**
      * @returns returns a middleware that checks that todo with id in request params belongs to the todo group in request params
+     * 
+     * **Note**: It sets `res.locals.data.todo`
      */
     checkTodoInGroup: () => async (req, res, next) => {
         const { todoId } = req.params;
@@ -20,6 +22,8 @@ module.exports = {
     },
     /**
      * @returns Returns Middleware that checks req.user is the owner of this group
+     * 
+     * **Note**: If no `res.locals.data.todo` is set, it sets `res.locals.data.todoGroup`
      */
     checkUserIsGroupOwner: () => async (req, res, next) => {
         // if todo was already loaded (for todoId), use it
