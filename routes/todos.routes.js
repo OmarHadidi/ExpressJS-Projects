@@ -6,7 +6,7 @@ const hlp = require("../helpers");
 
 const router = Router();
 
-router.post("/", mw.todos.checkUserIsGroupOwner({}), async (req, res, next) => {
+router.post("/", mw.todos.checkUserIsGroupOwner(), async (req, res, next) => {
     const { task, status } = req.body;
     const { todoGroup } = res.locals.data;
     const todo = await todoGroup.createTodo({
@@ -27,30 +27,32 @@ router.patch(
     mw.general.filterPATCHChanges({ onlyInclude: ["task", "status"] }),
     async (req, res, next) => {
         try {
-            const todo =
-                res.locals.data.todo ||
-                (await models.Todo.findByPk(req.params.todoId));
+            const todo = res.locals.data.todo;
             const { cleanChanges } = res.locals.data;
             await todo.update(cleanChanges);
             res.sendStatus(204);
         } catch (err) {
             next(err);
         }
-        /*
-id=1
-{
-    "status": false,
-    "lux": "adsas",
-    "id": 2
-}
-
-
-*/
     }
 );
-router.put("/:todoId", (req, res) => res.send("Here, Routes"));
-router.delete("/:todoId", (req, res) => res.send("Here, Routes"));
-router.delete("/", (req, res) => res.send("Here, Routes"));
+router.delete(
+    "/",
+    mw.todos.checkUserIsGroupOwner(),
+    async (req, res, next) => {
+        // TODO: Take many id's, validate, delete
+    }
+);
+router.delete(
+    "/:todoId",
+    mw.todos.checkTodoInGroup(),
+    mw.todos.checkUserIsGroupOwner(),
+    async (req, res, next) => {
+        const { todo } = res.locals.data;
+        await todo.destroy();
+        res.sendStatus(204);
+    }
+);
 // Actions
 router.post(
     "/:todoId/set-status",

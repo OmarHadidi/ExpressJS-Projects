@@ -7,11 +7,7 @@ const { models, log } = require("../config");
 const todosRouter = require("./todos.routes");
 
 // Each group level
-
 const groupRouter = Router();
-
-// TODO: Use checkAuth in mw's that need it (PATCH for ex)(before checkUserIsGroupOwner)
-
 groupRouter.get("/", async (req, res, next) => {
     // NOTE: Must set `res.locals.data.groupId` first [Done in setGroupId mw's]
     log.dump("res.locals.data.groupId", res.locals.data.groupId);
@@ -31,9 +27,7 @@ groupRouter.get("/", async (req, res, next) => {
 groupRouter.use("/todos", mw.auth.checkAuth({}), todosRouter);
 
 // All groups level
-
 const allGroupsRouter = Router();
-
 allGroupsRouter.get("/", (req, res) => {
     res.send("Here, Routes");
 });
