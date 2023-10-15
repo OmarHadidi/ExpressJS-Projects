@@ -3,11 +3,14 @@ const { models, errors, log } = require("../config");
 
 module.exports = {
     /**
+     * @param {*} softDeleted if `false`, which is the default,
+     * only non-deleted will be returned, if `true`, deleted
+     * and non-deleted will be returned
      * @returns returns a middleware that checks that todo with id in request params belongs to the todo group in request params
      * 
      * **Note**: It sets `res.locals.data.todo`
      */
-    checkTodoInGroup: () => async (req, res, next) => {
+    checkTodoInGroup: (softDeleted=false) => async (req, res, next) => {
         const { todoId } = req.params;
         const { groupId } = res.locals.data;
         // TODO: Dont load twice
@@ -15,6 +18,7 @@ module.exports = {
             res.locals.data.todo ||
             (await models.Todo.findByPk(todoId, {
                 include: [models.TodoGroup],
+                paranoid: !softDeleted
             }));
         if (todo.TodoGroupId != groupId) return next(createHttpError[404]());
         res.locals.data.todo = todo;

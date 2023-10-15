@@ -92,7 +92,23 @@ router.post(
         }
     }
 );
-
+router.post(
+    "/:todoId/restore",
+    mw.todos.checkTodoInGroup(true),
+    mw.todos.checkUserIsGroupOwner(),
+    async (req, res, next) => {
+        try {
+            const { todo } = res.locals.data;
+            await todo.restore();
+            const {filtered: cleanTodo} = hlp.exclude(todo.toJSON(), {
+                onlyInclude: ["status", "task", "id"],
+            });
+            res.json(cleanTodo);
+        } catch (err) {
+            next(err);
+        }
+    }
+);
 // Actions
 router.post(
     "/:todoId/set-status",
