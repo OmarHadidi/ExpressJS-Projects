@@ -50,14 +50,12 @@ router.delete(
 router.post(
     "/deletes",
     mw.todos.checkUserIsGroupOwner(),
-    async (req, res, next) => {
+    async function filterRequestedIds(req, res, next) {
         try {
-            // TODO: Take many id's, validate, delete, respond with {fail, succ}
             const { requests } = req.body;
             const requestedIds = [];
             for (const rq of requests) requestedIds.push(rq.id);
-            // Compare requested ids to available ids
-            // NOTE: if one fails, all fail
+            // get available requested ids from DB in this group
             const availableToDel = await models.Todo.findAll({
                 where: {
                     id: { [Op.in]: requestedIds },
@@ -65,15 +63,26 @@ router.post(
                 },
                 attributes: ["id"],
             });
+            // get unavailable requested ids
             const availableIds = availableToDel.map(({ id }) => id);
             const unavailableIds = requestedIds.filter(
                 (reqId) => !availableIds.includes(reqId)
             );
+            res.locals.data.availableIds = availableIds;
+            res.locals.data.unavailableIds = unavailableIds;
+            next();
+        } catch (err) {
+            next(err);
+        }
+    },
+    async (req, res, next) => {
+        try {
+            const { availableIds, unavailableIds } = res.locals.data;
             // delete availableIds
+            // NOTE: if one fails, all fail
             await models.Todo.destroy({
                 where: { id: { [Op.in]: availableIds } },
             });
-            // TODO: why each one is unavailable? already deleted, non-existing, ..etc?
             res.json({
                 succeeded: availableIds,
                 unavailable: unavailableIds,
