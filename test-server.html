@@ -9,16 +9,31 @@
 
 <body>
     <script>
-        fetch('http://localhost:5000/', {
-            method: 'PATCH',
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                id: 1,
-                status: true
+        function patch() {
+            return fetch('http://localhost:5000/', {
+                method: 'PATCH',
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    id: 1,
+                    status: true
+                })
+            }).then(res => res.text()).then(data => console.log(data))
+        }
+        function deleteMany() {
+            return fetch('http://localhost:5000/my/todos/deletes', {
+                method: 'POST',
+                headers: { 'Content-Type': 'Application/json' },
+                body: JSON.stringify({
+                    requests: [
+                        { id: 1 },
+                        { id: 2 },
+                        { id: 8 },
+                    ]
+                })
             })
-        }).then(res => res.text()).then(data => console.log(data))
+        }
     </script>
 </body>
 

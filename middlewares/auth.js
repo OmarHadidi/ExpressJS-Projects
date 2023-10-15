@@ -11,10 +11,6 @@ module.exports = {
         ({ enabled, userId }) =>
         async (req, res, next) => {
             log.dump("req.user from checkAuth", req.user);
-            log.dump(
-                "req.user.hasOwnProperty('isAuthenticated')",
-                req.user.hasOwnProperty("isAuthenticated")
-            );
             if (enabled === false) return next();
             if (req.user && req.isAuthenticated()) return next();
             if (userId) {

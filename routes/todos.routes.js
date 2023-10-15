@@ -3,6 +3,7 @@ const { models, errors, log } = require("../config");
 const createHttpError = require("http-errors");
 const mw = require("../middlewares");
 const hlp = require("../helpers");
+const { Op } = require("sequelize");
 
 const router = Router();
 
@@ -37,13 +38,6 @@ router.patch(
     }
 );
 router.delete(
-    "/",
-    mw.todos.checkUserIsGroupOwner(),
-    async (req, res, next) => {
-        // TODO: Take many id's, validate, delete
-    }
-);
-router.delete(
     "/:todoId",
     mw.todos.checkTodoInGroup(),
     mw.todos.checkUserIsGroupOwner(),
@@ -53,6 +47,43 @@ router.delete(
         res.sendStatus(204);
     }
 );
+router.post(
+    "/deletes",
+    mw.todos.checkUserIsGroupOwner(),
+    async (req, res, next) => {
+        try {
+            // TODO: Take many id's, validate, delete, respond with {fail, succ}
+            const { requests } = req.body;
+            const requestedIds = [];
+            for (const rq of requests) requestedIds.push(rq.id);
+            // Compare requested ids to available ids
+            // NOTE: if one fails, all fail
+            const availableToDel = await models.Todo.findAll({
+                where: {
+                    id: { [Op.in]: requestedIds },
+                    TodoGroupId: res.locals.data.groupId,
+                },
+                attributes: ["id"],
+            });
+            const availableIds = availableToDel.map(({ id }) => id);
+            const unavailableIds = requestedIds.filter(
+                (reqId) => !availableIds.includes(reqId)
+            );
+            // delete availableIds
+            await models.Todo.destroy({
+                where: { id: { [Op.in]: availableIds } },
+            });
+            // TODO: why each one is unavailable? already deleted, non-existing, ..etc?
+            res.json({
+                succeeded: availableIds,
+                unavailable: unavailableIds,
+            });
+        } catch (err) {
+            next(err);
+        }
+    }
+);
+
 // Actions
 router.post(
     "/:todoId/set-status",
