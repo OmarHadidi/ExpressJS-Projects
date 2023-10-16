@@ -15,7 +15,7 @@ groupRouter.get("/", async (req, res, next) => {
         include: [
             {
                 model: models.Todo,
-                attributes: { exclude: ["id", "TodoGroupId", "deletedAt"] },
+                attributes: { exclude: ["TodoGroupId", "deletedAt"] },
             },
         ],
         attributes: {

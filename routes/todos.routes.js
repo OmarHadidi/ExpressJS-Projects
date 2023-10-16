@@ -92,6 +92,19 @@ router.post(
         }
     }
 );
+router.get(
+    "/deletes",
+    mw.todos.checkUserIsGroupOwner(),
+    async (req, res, next) => {
+        const { groupId } = res.locals.data;
+        const deletedTodos = await models.Todo.findAll({
+            where: { TodoGroupId: groupId, deletedAt: { [Op.not]: null } },
+            paranoid: false,
+            attributes: { exclude: ["TodoGroupId"] },
+        });
+        res.json(deletedTodos);
+    }
+);
 router.post(
     "/:todoId/restore",
     mw.todos.checkTodoInGroup(true),
@@ -100,7 +113,7 @@ router.post(
         try {
             const { todo } = res.locals.data;
             await todo.restore();
-            const {filtered: cleanTodo} = hlp.exclude(todo.toJSON(), {
+            const { filtered: cleanTodo } = hlp.exclude(todo.toJSON(), {
                 onlyInclude: ["status", "task", "id"],
             });
             res.json(cleanTodo);
