@@ -7,6 +7,7 @@ const session = require("express-session");
 const passport = require("passport");
 const flash = require("connect-flash");
 const cors = require("cors");
+const sqlz = require("sequelize");
 require("dotenv").config();
 
 const config = require("./config");
@@ -68,6 +69,12 @@ app.use(function (req, res, next) {
 // error handler
 app.use(function (err, req, res, next) {
     config.log.error(err);
+
+    // if(err instanceof sqlz.ValidationError){
+    //     const notNullErr = err.errors.find(e => e.type == 'notnull violation');
+    //     if(notNullErr) notNullErr.message = config.errors.Missing(notNullErr.path)
+    // }
+
     // set locals, only providing error in development
     res.locals.flash = res.locals.flash || {}
     res.locals.message = err.message;

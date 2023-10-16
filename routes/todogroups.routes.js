@@ -9,20 +9,24 @@ const todosRouter = require("./todos.routes");
 // Each group level
 const groupRouter = Router();
 groupRouter.get("/", async (req, res, next) => {
-    // NOTE: Must set `res.locals.data.groupId` first [Done in setGroupId mw's]
-    log.dump("res.locals.data.groupId", res.locals.data.groupId);
-    const tdGroup = await models.TodoGroup.findByPk(res.locals.data.groupId, {
-        include: [
-            {
-                model: models.Todo,
-                attributes: { exclude: ["TodoGroupId", "deletedAt"] },
+    try {
+        // NOTE: Must set `res.locals.data.groupId` first [Done in setGroupId mw's]
+        log.dump("res.locals.data.groupId", res.locals.data.groupId);
+        const tdGroup = await models.TodoGroup.findByPk(res.locals.data.groupId, {
+            include: [
+                {
+                    model: models.Todo,
+                    attributes: { exclude: ["TodoGroupId", "deletedAt"] },
+                },
+            ],
+            attributes: {
+                exclude: ["id", "OwnerId"],
             },
-        ],
-        attributes: {
-            exclude: ["id", "OwnerId"],
-        },
-    });
-    res.json(tdGroup);
+        });
+        res.json(tdGroup);
+    } catch (err) {
+        next(err);
+    }
 });
 groupRouter.use("/todos", mw.auth.checkAuth({}), todosRouter);
 

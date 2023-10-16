@@ -10,13 +10,17 @@ module.exports = {
     checkAuth:
         ({ enabled, userId }) =>
         async (req, res, next) => {
-            log.dump("req.user from checkAuth", req.user);
-            if (enabled === false) return next();
-            if (req.user && req.isAuthenticated()) return next();
-            if (userId) {
-                const user = await models.User.findByPk(userId);
-                return req.logIn(user, (err) => next());
+            try {
+                log.dump("req.user from checkAuth", req.user);
+                if (enabled === false) return next();
+                if (req.user && req.isAuthenticated()) return next();
+                if (userId) {
+                    const user = await models.User.findByPk(userId);
+                    return req.logIn(user, (err) => next());
+                }
+                res.redirect("/auth/login");
+            } catch (err) {
+                next(err);
             }
-            res.redirect("/auth/login");
         },
 };

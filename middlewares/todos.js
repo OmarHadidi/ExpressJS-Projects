@@ -11,18 +11,22 @@ module.exports = {
      * **Note**: It sets `res.locals.data.todo`
      */
     checkTodoInGroup: (softDeleted=false) => async (req, res, next) => {
-        const { todoId } = req.params;
-        const { groupId } = res.locals.data;
-        // TODO: Dont load twice
-        const todo =
-            res.locals.data.todo ||
-            (await models.Todo.findByPk(todoId, {
-                include: [models.TodoGroup],
-                paranoid: !softDeleted
-            }));
-        if (todo.TodoGroupId != groupId) return next(createHttpError[404]());
-        res.locals.data.todo = todo;
-        next();
+        try {
+            const { todoId } = req.params;
+            const { groupId } = res.locals.data;
+            // TODO: Dont load twice
+            const todo =
+                res.locals.data.todo ||
+                (await models.Todo.findByPk(todoId, {
+                    include: [models.TodoGroup],
+                    paranoid: !softDeleted
+                }));
+            if (todo.TodoGroupId != groupId) return next(createHttpError[404]());
+            res.locals.data.todo = todo;
+            next();
+        } catch (err) {
+            next(err);
+        }
     },
     /**
      * @returns Returns Middleware that checks req.user is the owner of this group
@@ -30,17 +34,21 @@ module.exports = {
      * **Note**: If no `res.locals.data.todo` is set, it sets `res.locals.data.todoGroup`
      */
     checkUserIsGroupOwner: () => async (req, res, next) => {
-        // if todo was already loaded (for todoId), use it
-        let todo = res.locals.data.todo;
-        if (todo && todo.TodoGroup && todo.TodoGroup.OwnerId != req.user.id)
-            return next(createHttpError[401](errors.NotOwner("group")));
-
-        // otherwise get it from `groupId`
-        const { groupId } = res.locals.data;
-        todoGroup = await models.TodoGroup.findByPk(groupId);
-        res.locals.data.todoGroup = todoGroup;
-        if (todoGroup.OwnerId != req.user.id)
-            return next(createHttpError[401](errors.NotOwner("group")));
-        next();
+        try {
+            // if todo was already loaded (for todoId), use it
+            let todo = res.locals.data.todo;
+            if (todo && todo.TodoGroup && todo.TodoGroup.OwnerId != req.user.id)
+                return next(createHttpError[401](errors.NotOwner("group")));
+    
+            // otherwise get it from `groupId`
+            const { groupId } = res.locals.data;
+            todoGroup = await models.TodoGroup.findByPk(groupId);
+            res.locals.data.todoGroup = todoGroup;
+            if (todoGroup.OwnerId != req.user.id)
+                return next(createHttpError[401](errors.NotOwner("group")));
+            next();
+        } catch (err) {
+            next(err);
+        }
     },
 };

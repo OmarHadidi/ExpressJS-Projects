@@ -4,22 +4,31 @@ const createHttpError = require("http-errors");
 const mw = require("../middlewares");
 const hlp = require("../helpers");
 const { Op } = require("sequelize");
+const joiSchemas = require("../validation/joi");
 
 const router = Router();
 
 router.post("/", mw.todos.checkUserIsGroupOwner(), async (req, res, next) => {
-    const { task, status } = req.body;
-    const { todoGroup } = res.locals.data;
-    const todo = await todoGroup.createTodo({
-        task,
-        status,
-    });
-    // hide unwanted fields
-    const todoData = todo.toJSON();
-    const exclude = ["id", "TodoGroupId", "deletedAt"];
-    exclude.forEach((ex) => delete todoData[ex]);
+    try {
+        const { task, status } = req.body;
+        const { todoGroup } = res.locals.data;
+        await joiSchemas.createTodoSchema.validateAsync({
+            task,
+            status,
+        });
+        const todo = await todoGroup.createTodo({
+            task,
+            status,
+        });
+        // hide unwanted fields
+        const todoData = todo.toJSON();
+        const exclude = ["id", "TodoGroupId", "deletedAt"];
+        exclude.forEach((ex) => delete todoData[ex]);
 
-    res.json(todoData);
+        res.json(todoData);
+    } catch (err) {
+        next(err);
+    }
 });
 router.patch(
     "/:todoId",
@@ -42,9 +51,13 @@ router.delete(
     mw.todos.checkTodoInGroup(),
     mw.todos.checkUserIsGroupOwner(),
     async (req, res, next) => {
-        const { todo } = res.locals.data;
-        await todo.destroy();
-        res.sendStatus(204);
+        try {
+            const { todo } = res.locals.data;
+            await todo.destroy();
+            res.sendStatus(204);
+        } catch (err) {
+            next(err);
+        }
     }
 );
 router.post(
@@ -96,13 +109,17 @@ router.get(
     "/deletes",
     mw.todos.checkUserIsGroupOwner(),
     async (req, res, next) => {
-        const { groupId } = res.locals.data;
-        const deletedTodos = await models.Todo.findAll({
-            where: { TodoGroupId: groupId, deletedAt: { [Op.not]: null } },
-            paranoid: false,
-            attributes: { exclude: ["TodoGroupId"] },
-        });
-        res.json(deletedTodos);
+        try {
+            const { groupId } = res.locals.data;
+            const deletedTodos = await models.Todo.findAll({
+                where: { TodoGroupId: groupId, deletedAt: { [Op.not]: null } },
+                paranoid: false,
+                attributes: { exclude: ["TodoGroupId"] },
+            });
+            res.json(deletedTodos);
+        } catch (err) {
+            next(err);
+        }
     }
 );
 router.post(
@@ -128,14 +145,18 @@ router.post(
     mw.todos.checkTodoInGroup(),
     mw.todos.checkUserIsGroupOwner(),
     async (req, res, next) => {
-        const { status } = req.body;
-        // got todo by id from previous middlewares
-        const { todo } = res.locals.data;
-        todo.status = status;
-        await todo.save();
+        try {
+            const { status } = req.body;
+            // got todo by id from previous middlewares
+            const { todo } = res.locals.data;
+            todo.status = status;
+            await todo.save();
 
-        // TODO: check if req.user's role in this group allows
-        res.sendStatus(204);
+            // TODO: check if req.user's role in this group allows
+            res.sendStatus(204);
+        } catch (err) {
+            next(err);
+        }
     }
 );
 
