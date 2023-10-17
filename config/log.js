@@ -4,7 +4,7 @@ const log = {
     info: (...msg) => console.log(`${chalk.blueBright("info :")}`, ...msg),
     error: (err) => console.log(chalk.redBright(`Error :>> ${err.name}\n${err.message}\n`), err),
     system: (...msg) => console.log(`${chalk.yellowBright("system :")}`, ...msg),
-    sequelize: (...msg) => console.log(`${chalk.yellowBright("sequelize :")}`, ...msg),
+    sequelize: (...msg) => console.log(`${chalk.yellowBright("sequelize :")}`, msg[0]),
     dump: (msg, value) => console.log(`${chalk.blueBright(msg)} :>> `, value),
 };
 

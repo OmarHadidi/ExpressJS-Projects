@@ -3,5 +3,7 @@ module.exports = {
     UsernamePasswordIncorrect: () => `username and/or password is incorrect`,
     Missing: (sthMissing) => `${sthMissing} is missing`,
     AlphaOnly: (fieldName) => `${fieldName} should contain alphabetic letters only`,
-    NotEmail: (fieldName) => `${fieldName} should be a valid email`
+    NotEmail: (fieldName) => `${fieldName} should be a valid email`,
+    NotOwner: (thing) => `You are not the owner of this ${thing}`,
+    UnwantedFields: (...fields) => `${fields} are unwanted`
 };

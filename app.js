@@ -7,16 +7,12 @@ const session = require("express-session");
 const passport = require("passport");
 const flash = require("connect-flash");
 const cors = require("cors");
+const sqlz = require("sequelize");
 require("dotenv").config();
 
 const config = require("./config");
 const mw = require("./middlewares");
-
-var indexRouter = require("./routes/index");
-var usersRouter = require("./routes/users");
-var usersRouter = require("./routes/users");
-const authRouter = require("./routes/auth");
-
+const routes = require("./routes");
 var app = express();
 
 // view engine setup
@@ -51,12 +47,19 @@ config.passport.setupPassport();
 
 config.log.system("I am Here");
 // My middlewares
+app.use(mw.setLocalsData());
 app.use(mw.setFlash());
 
 // Routes
-app.use("/", indexRouter);
-app.use("/users", usersRouter);
-app.use("/auth", authRouter);
+app.use("/", routes.index);
+app.use("/auth", routes.auth);
+app.use("/groups", routes.todoGroups.groups);
+app.use(
+    "/my",
+    mw.auth.checkAuth({ userId: 1 }),
+    mw.tdGrps.setMyGroupId(),
+    routes.todoGroups.oneGroup
+);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
@@ -66,7 +69,14 @@ app.use(function (req, res, next) {
 // error handler
 app.use(function (err, req, res, next) {
     config.log.error(err);
+
+    // if(err instanceof sqlz.ValidationError){
+    //     const notNullErr = err.errors.find(e => e.type == 'notnull violation');
+    //     if(notNullErr) notNullErr.message = config.errors.Missing(notNullErr.path)
+    // }
+
     // set locals, only providing error in development
+    res.locals.flash = res.locals.flash || {}
     res.locals.message = err.message;
     res.locals.error = req.app.get("env") === "development" ? err : {};
 

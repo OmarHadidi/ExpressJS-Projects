@@ -5,6 +5,7 @@ const errors = require("../config/errors");
  * @param {Sequelize} sequelize
  */
 module.exports = function (sequelize) {
+    // const TodoGroup = require('./TodoGroup.model')(sequelize);
     return sequelize.define("User", {
         name: {
             type: DataTypes.STRING,
@@ -26,5 +27,13 @@ module.exports = function (sequelize) {
                 isEmail: { msg: errors.NotEmail("email") },
             },
         },
+        // MainTodoGroupId: {
+        //     type: DataTypes.INTEGER,
+        //     references: {
+        //         model: TodoGroup,
+        //         key: "id",
+        //     },
+        //     unique: true,
+        // },
     });
 };
